@@ -6,6 +6,7 @@ from flask import (
     request,
     url_for
 )
+from flaskext.mysql import MySQL
 
 app = Flask(__name__)
 
@@ -89,6 +90,34 @@ def get_student_data():
 @app.errorhandler(404)
 def not_found(error):
     return make_response(jsonify({'error': 'Not found'}), 404)
+
+
+
+mysql = MySQL()
+app.config['MYSQL_DATABASE_USER'] = 'root'
+app.config['MYSQL_DATABASE_PASSWORD'] = 'password'
+app.config['MYSQL_DATABASE_DB'] = 'example_db'
+app.config['MYSQL_DATABASE_HOST'] = 'localhost'
+mysql.init_app(app)
+
+conn = mysql.connect()
+cursor = conn.cursor()
+
+cursor.execute(
+    "CREATE TABLE IF NOT EXISTS MASTER ("
+    "id INT AUTO_INCREMENT,"
+    "asset_id VARCHAR(36),"
+    "file_name VARCHAR(255),"
+    "file_type VARCHAR(255),"
+    "creation_ts TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,"
+    "status VARCHAR(50),"
+    "PRIMARY KEY (id)"
+    ")"
+)
+# insert into MASTER(asset_id, file_name, file_type, status) VALUES(UUID(), "myfilename.pdf", "PDF", "acknowledged")
+
+data = cursor.fetchone()
+
 
 
 if __name__ == "__main__":
